@@ -1,0 +1,449 @@
+/* ==========================================================================
+   ESTILOS GENERALES (Mismo estilo que tu juego de reflejos)
+   ========================================================================== */
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #1a1a2e; /* Fondo oscuro unificado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: "Balsamiq Sans", sans-serif;
+    overflow:scroll; 
+    box-sizing: border-box;
+}
+
+#contenedor-bloque-juego {
+    width: 100%;
+    max-width: 900px;
+    border-radius: 12px;
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background-color: #0f0f1a; 
+}
+
+/* ==========================================================================
+   INTERFAZ SUPERIOR (Adaptada a tu estilo)
+   ========================================================================== */
+.interfaz-superior {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 18px 25px;
+    background-color: #0f0f1a; 
+    color: #fff;               
+    border-bottom: 3px solid #fffa65; 
+}
+
+.interfaz-superior h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    color: #fffa65; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.interfaz-controles {
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+.marcador {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ==========================================================================
+   BOTÓN DE SILENCIO (MUTE) CON TU SVG
+   ========================================================================== */
+.btn-sonido {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-sonido svg {
+    width: 22px;
+    height: 22px;
+    fill: #f8f8f4;
+    transition: fill 0.2s ease;
+}
+
+.btn-sonido:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.btn-sonido:hover svg {
+    fill: #ff9f43; 
+}
+
+.btn-sonido.silenciado {
+    background: rgba(255, 118, 117, 0.2);
+    border-color: #ff7675;
+}
+
+.btn-sonido.silenciado svg {
+    fill: #ff7675;
+}
+
+/* ==========================================================================
+   PANEL DE INVENTARIO (Optimizado para iconos PNG)
+   ========================================================================== */
+.panel-mision {
+    background-color: #131324;
+    padding: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.inventario-objetivos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.item-objetivo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 250, 101, 0.15);
+    padding: 10px 15px;
+    border-radius: 12px;
+    width: 110px; /* Tamaño fijo de tarjeta para mantener simetría */
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Contenedor del icono para controlar las dimensiones físicas */
+.contenedor-icono {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icono-objeto {
+    max-width: 130px;
+    max-height: 130px;
+    object-fit:fill;
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+    transition: filter 0.3s ease;
+}
+
+.nombre-objeto {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #e2e2e2;
+}
+
+
+/* ==========================================================================
+   ESTADO COMPLETADO (Cuando el script añade la clase .encontrado)
+   ========================================================================== */
+.item-objetivo.encontrado {
+    background: rgb(12, 137, 112);
+    border-color: #00ffcc;
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.15);
+}
+
+
+
+.item-objetivo.encontrado .nombre-objeto {
+    color: #00ffcc;
+    opacity: 0.6;
+}
+
+.item-objetivo.encontrado .check-completado {
+    opacity: 1;
+    transform: scale(1); /* El check aparece con un sutil brinco animado */
+}
+
+/* ==========================================================================
+   EFECTO DE CHISPAS MÁGICAS AL ENCONTRAR OBJETOS
+   ========================================================================== */
+.chispa-magica {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #fffa65, 0 0 15px #ff9f43; 
+    pointer-events: none; 
+    z-index: 10; 
+    
+    /* Aumentamos el tiempo a 1.5s (1500ms) y usamos un movimiento más natural (ease-out) */
+    animation: explosion-chispa 1.5s ease-out forwards;
+}
+
+@keyframes explosion-chispa {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    40% {
+        /* A mitad de camino aún brillan al 100% y mantienen su tamaño */
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.8), calc(var(--ty) * 0.8)) scale(0.8);
+    }
+    100% {
+        /* Al final terminan de llegar a su destino, se encogen y desaparecen */
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ==========================================================================
+   ESCENARIO DEL JUEGO CON FILTRO DE COLOR (Mismo estilo que el salón)
+   ========================================================================== */
+#escenario-busqueda {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #0f0f1a;
+}
+
+.imagen-escenario {
+    width: 100%;
+    display: block;
+    height: auto;
+    user-select: none;
+}
+
+/* 🌟 LA CAPA MÁGICA: Aplica el degradado interactuando con la acuarela */
+#escenario-busqueda::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Tus tonos exactos */
+    background: linear-gradient(#b3c7ea, #7176f6); 
+    /* Multiplica los colores con el dibujo de fondo para oscurecerlo de forma natural */
+    mix-blend-mode: multiply; 
+    /* Permite que los clicks atraviesen la capa y lleguen a las hitboxes */
+    pointer-events: none; 
+    z-index: 2; 
+}
+
+/* HITBOXES INVISIBLES CALIBRADAS */
+.hitbox {
+    position: absolute;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    /* 🛠️ NOTA: Modifica a 'transparent' una vez que compruebes que caen en su lugar */
+    background: rgba(255, 0, 0, 0.35); 
+    /* Subimos el z-index a 5 para que queden por ENCIMA de la capa del degradado */
+    z-index: 5; 
+}
+
+/* Coordenadas relativas en base a tu imagen limpia */
+#hitbox-caja { top: 19.5%; left: 36.5%; width: 12%; height: 12%; }
+#hitbox-cerillas { top: 40%; left: 56%; width: 9%; height: 4.5%; }
+#hitbox-candela { top: 27.5%; left: 79%; width: 5.5%; height: 11%; }
+#hitbox-porta { top: 55.5%; left: 48.5%; width: 12.5%; height: 10%; }
+/* ==========================================================================
+   PANTALLAS MODALES (Tu sistema de cajas mágicas a pantalla completa)
+   ========================================================================== */
+#pantalla-inicio, #pantalla-final {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+#pantalla-inicio { background: rgba(15, 15, 26, 0.96); z-index: 9999; }
+#pantalla-final { background: rgba(15, 15, 26, 0.92); z-index: 9998; }
+
+.mensaje-caja {
+    background: linear-gradient(135deg, #2b2b40, #1a1a2e);
+    border: 3px solid #fffa65;
+    border-radius: 15px;
+    padding: 35px;
+    max-width: 550px;
+    width: 100%;
+    color: #fff;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.8);
+    animation: aparicion-suave 0.4s ease-out;
+    box-sizing: border-box;
+}
+
+#pantalla-inicio h2 { color: #fffa65; margin-top: 0; font-size: 1.8rem; }
+#pantalla-final h2 { color: #00ffcc; margin-top: 0; font-size: 1.8rem; }
+
+.texto-lore {
+    font-size: 1.1rem; 
+    line-height: 1.6;
+    color: #f5f5f0;
+    margin-bottom: 20px;
+}
+
+.instrucciones-caja {
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 4px solid #fffa65;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    text-align: left; 
+}
+
+.instrucciones-caja h3 { margin: 0 0 8px 0; color: #fff; font-size: 1.1rem; }
+.instrucciones-caja p { margin: 6px 0; font-size: 0.95rem; color: #ccc; }
+
+/* Botón Mágico Unificado */
+.boton-magico {
+    display: inline-block;
+    background: linear-gradient(to right, #fffa65, #ff9f43);
+    border: none;
+    padding: 14px 35px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #0f0f1a;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 159, 67, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.boton-magico:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 250, 101, 0.6);
+}
+
+.oculto { display: none !important; }
+
+/* ANIMACIÓN */
+@keyframes aparicion-suave {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   EFECTO LINTERNA / VELA ENCENDIDA (Siguiente Fase)
+   ========================================================================== */
+body.fase-oscura {
+    cursor: none !important; /* Oculta la flecha normal del sistema */
+}
+
+/* ==========================================================================
+   EFECTO VELA ENCENDIDA (Modo Noche Azulado)
+   ========================================================================== */
+
+.fase-oscura-activa {
+    cursor: none !important;
+    position: relative;
+    overflow: hidden; 
+}
+
+#luz-vela {
+    position: absolute; 
+    top: 50%;
+    left: 50%;
+    width: 300px; 
+    height: 300px;
+    border-radius: 50%;
+    pointer-events: none; 
+    z-index: 50; 
+    transform: translate(-50%, -50%); 
+    
+    /* Degradado y sombra azulada */
+    background: radial-gradient(circle, rgba(255, 250, 101, 0.25) 0%, rgba(255, 159, 67, 0.1) 45%, transparent 75%);
+    box-shadow: 0 0 120px 5000px rgba(20, 45, 85, 0.85);
+}
+
+/* El icono de la vela */
+#luz-vela::after {
+    content: ""; /* Importante: vacío para que funcione el background-image */
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    
+    /* Tamaño fijo de tu icono */
+    width: 200px; 
+    height: 200px;
+    
+    /* Centrado absoluto */
+    transform: translate(-50%, -50%); 
+    
+    /* Imagen del cursor */
+    background-image: url('./objetos/cursorvela.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    filter: drop-shadow(0 0 10px #fffa65);
+    animation: vibracion-llama 0.1s infinite alternate;
+}
+
+
+/* ==========================================================================
+   AVISO DE ROTACIÓN OBLIGATORIA (Móviles)
+   ========================================================================== */
+#aviso-rotar {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: #0f0f1a;
+    color: white;
+    z-index: 100000;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 30px;
+}
+
+.contenido-aviso { text-align: center; max-width: 400px; }
+.icono-rotar { font-size: 4rem; animation: rodar 2s infinite linear; margin-bottom: 20px; }
+
+@keyframes rodar {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+    100% { transform: rotate(-90deg); }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+    #aviso-rotar { display: flex; }
+    #contenedor-bloque-juego { display: none; }
+}
+
+/* RESPONSIVE HORIZONTAL DE TU CODIGO ANTERIOR */
+@media (max-height: 500px) and (orientation: landscape) {
+    body { padding: 0; background-color: #0f0f1a; }
+    #contenedor-bloque-juego { max-width: 100%; border-radius: 0; box-shadow: none; }
+    .interfaz-superior { padding: 8px 15px; }
+    .interfaz-superior h1 { font-size: 1.1rem; }
+    .marcador { font-size: 0.95rem; padding: 4px 12px; }
+    .btn-sonido { width: 32px; height: 32px; }
+    .panel-mision { padding: 8px; }
+    .item-objetivo { padding: 5px 12px; font-size: 0.85rem; gap: 8px; }
+    .mensaje-caja { padding: 20px; max-width: 90%; }
+}

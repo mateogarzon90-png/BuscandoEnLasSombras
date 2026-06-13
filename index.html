@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardianes de la Luz: 1º Domingo de Adviento</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Patrick+Hand+SC&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="contenedor-bloque-juego">
+        
+        <header class="interfaz-superior">
+            <h1>🕯️ 1º Domingo: Esperanza</h1>
+            <div class="interfaz-controles">
+                <div class="marcador" id="contador-objetos">Objetos: 0 / 4</div>
+                <button id="btn-mute" class="btn-sonido" title="Silenciar/Activar sonido">
+                    <svg class="icono-audio-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M13.5 4.06c0-.75-.74-1.23-1.42-.87l-4.69 2.5H4.5A1.5 1.5 0 003 9.19v5.63a1.5 1.5 0 001.5 1.5h2.89l4.69 2.5c.68.36 1.42-.12 1.42-.87V4.06zM18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 4.23v1.54c2.58.69 4.5 3.03 4.5 5.82s-1.92 5.13-4.5 5.82v1.54c3.42-.73 6-3.77 6-7.36s-2.58-6.63-6-7.36z"/>
+                    </svg>
+                    <svg class="icono-audio-off oculto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M13.5 4.06c0-.75-.74-1.23-1.42-.87l-4.69 2.5H4.5A1.5 1.5 0 003 9.19v5.63a1.5 1.5 0 001.5 1.5h2.89l4.69 2.5c.68.36 1.42-.12 1.42-.87V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 001.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L20.56 12l2.72-1.72a.75.75 0 00-1.06-1.06l-1.72 1.72-1.72-1.72z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        
+ <section class="panel-mision">
+            <div class="inventario-objetivos">
+                <div class="item-objetivo" id="obj-caja">
+                    <div class="contenedor-icono">
+                        <img src="objetos/cajaCerillas.png" alt="Caja de cerillas" class="icono-objeto">
+                        <span class="check-completado"></span>
+                    </div>
+                    <span class="nombre-objeto">Caja de cerillas</span>
+                </div>
+                <div class="item-objetivo" id="obj-cerillas">
+                    <div class="contenedor-icono">
+                        <img src="objetos/2cerillas.png" alt="Cerillas" class="icono-objeto">
+                        <span class="check-completado"></span>
+                    </div>
+                    <span class="nombre-objeto">Cerillas sueltas</span>
+                </div>
+                <div class="item-objetivo" id="obj-candela">
+                    <div class="contenedor-icono">
+                        <img src="objetos/candela.png" alt="Candela" class="icono-objeto">
+                        <span class="check-completado"></span>
+                    </div>
+                    <span class="nombre-objeto">Candela blanca</span>
+                </div>
+                <div class="item-objetivo" id="obj-porta">
+                    <div class="contenedor-icono">
+                        <img src="objetos/portavelas.png" alt="Portavelas" class="icono-objeto">
+                        <span class="check-completado"></span>
+                    </div>
+                    <span class="nombre-objeto">Portacandelas</span>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="escenario-busqueda">
+            <img src="cajones-juego.png" alt="Cajones antiguos con secretos" class="imagen-escenario">
+
+            <button class="hitbox" id="hitbox-caja" onclick="JuegoAdviento.objetoEncontrado('caja')" title="Caja de cerillas"></button>
+            <button class="hitbox" id="hitbox-cerillas" onclick="JuegoAdviento.objetoEncontrado('cerillas')" title="Cerillas sueltas"></button>
+            <button class="hitbox" id="hitbox-candela" onclick="JuegoAdviento.objetoEncontrado('candela')" title="Candela blanca"></button>
+            <button class="hitbox" id="hitbox-porta" onclick="JuegoAdviento.objetoEncontrado('porta')" title="Portacandelas"></button>
+        </section>
+    </div>
+
+    <div id="pantalla-inicio">
+        <div class="mensaje-caja">
+            <h2>PRIMER DOMINGO DE ESPERANZA</h2>
+            <p class="texto-lore">La casa está a oscuras y reina la quietud de la noche. Para encender la primera llama que guiará a la familia, debes buscar las herramientas adecuadas entre los recuerdos.</p>
+            <div class="instrucciones-caja">
+                <h3>📜 Tu Misión:</h3>
+                <p>• Explora minuciosamente el interior de los cajones.</p>
+                <p>• Encuentra: la caja, las cerillas, la candela y su soporte.</p>
+            </div>
+            <button class="boton-magico" onclick="JuegoAdviento.comenzarJuego()">Comenzar Búsqueda</button>
+        </div>
+    </div>
+
+    <div id="pantalla-final" class="oculto">
+        <div class="mensaje-caja">
+            <h2>¡ESPERANZA ILUMINADA! 🕯️</h2>
+            <p class="texto-lore">¡Excelente trabajo! Has logrado reunir todos los elementos necesarios.</p>
+            <p>Colocas la candela en su soporte, raspas la cerilla con cuidado... ¡Y la primera luz de Adviento vence a las sombras!</p>
+            <button class="boton-magico" onclick="JuegoAdviento.iniciarFaseOscura()">Explorar el resto de la casa</button>
+        </div>
+    </div>
+
+    <div id="aviso-rotar">
+        <div class="contenido-aviso">
+            <div class="icono-rotar">🔄</div>
+            <h2>Por favor, gira tu dispositivo</h2>
+            <p>Este juego requiere pantalla horizontal para poder explorar correctamente los escenarios.</p>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

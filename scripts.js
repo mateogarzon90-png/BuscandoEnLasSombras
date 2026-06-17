@@ -125,26 +125,43 @@ iniciarFaseOscura: function() {
         if (this.faseOscuraActiva) return;
         this.faseOscuraActiva = true;
 
-        // 2. Ocultamos el cartel de victoria (ajusta el ID si es distinto)
+        // 2. Ocultamos el cartel de victoria si existe
         const pantallaFinal = document.getElementById('pantalla-final');
         if (pantallaFinal) pantallaFinal.classList.add('oculto');
         
-        // 3. Obtenemos el escenario
-    const imagenEscenario = document.querySelector('.imagen-escenario');
-        if (imagenEscenario) {
-        imagenEscenario.src = './altillo.png'; // Cambia la ruta a tu nueva imagen
+        // 3. Obtenemos el contenedor del escenario correctamente
+        const escenario = document.getElementById('escenario-busqueda');
+        if (!escenario) {
+            console.error("No se encontró el elemento #escenario-busqueda");
+            return;
         }
+
+        // 4. Cambiamos la imagen del escenario por el altillo nocturno
+        const imagenEscenario = escenario.querySelector('.imagen-escenario');
+        if (imagenEscenario) {
+            imagenEscenario.src = './altillo.png'; 
+        }
+
+        // [OPCIONAL] Ocultamos las hitboxes de la primera fase para que no interfieran
+        const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
+        hitboxesAntiguas.forEach(hb => hb.style.display = 'none');
         
-        // 4. Activamos la clase en el contenedor para el efecto visual
+        // 5. Activamos la clase en el contenedor para el efecto visual
         escenario.classList.add('fase-oscura-activa');
         
-        // 5. Creamos el elemento de luz
+        // 6. Creamos el elemento de luz
         const luz = document.createElement('div');
         luz.id = 'luz-vela';
         escenario.appendChild(luz);
         
-        // 6. Evento de movimiento (Coordenadas relativas al contenedor)
+        // Guardamos una referencia para usarla dentro del evento sin romper el contexto
+        const self = this;
+        
+        // 7. Evento de movimiento (Coordenadas relativas al contenedor)
         escenario.addEventListener('mousemove', function(e) {
+            // CORRECCIÓN: Usamos 'self' que apunta a JuegoAdviento
+            if (!self.faseOscuraActiva) return;
+
             const rect = escenario.getBoundingClientRect();
             
             // Calculamos la posición del ratón dentro del div del escenario
@@ -157,9 +174,8 @@ iniciarFaseOscura: function() {
             luz.style.top = posY + 'px';
         });
 
-        console.log("🕯️ La vela ha sido encendida. Modo noche activado.");
- } };
-
+        console.log("🕯️ La vela ha sido encendida. Modo noche activado perfectamente.");
+    }}
 
 // Autoarranque al cargar el DOM
 window.addEventListener('DOMContentLoaded', () => {

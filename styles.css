@@ -259,10 +259,10 @@ body {
 }
 
 /* Coordenadas relativas en base a tu imagen limpia */
-#hitbox-caja { top: 19.5%; left: 36.5%; width: 12%; height: 12%; }
-#hitbox-cerillas { top: 40%; left: 56%; width: 9%; height: 4.5%; }
-#hitbox-candela { top: 27.5%; left: 79%; width: 5.5%; height: 11%; }
-#hitbox-porta { top: 55.5%; left: 48.5%; width: 12.5%; height: 10%; }
+#hitbox-caja { top: 22.5%; left: 35.5%; width: 10%; height: 11%; }
+#hitbox-cerillas { top: 79%; left: 39%; width: 8%; height: 5.5%; }
+#hitbox-candela { top: 67%; left: 59%; width: 5.5%; height: 9%; }
+#hitbox-porta { top: 30%; left: 63%; width: 10.5%; height: 9%; }
 /* ==========================================================================
    PANTALLAS MODALES (Tu sistema de cajas mágicas a pantalla completa)
    ========================================================================== */
@@ -361,6 +361,7 @@ body.fase-oscura {
     cursor: none !important;
     position: relative;
     overflow: hidden; 
+    z-index: 10;
 }
 
 #luz-vela {

@@ -263,6 +263,8 @@ body {
 #hitbox-cerillas { top: 79%; left: 39%; width: 8%; height: 5.5%; }
 #hitbox-candela { top: 67%; left: 59%; width: 5.5%; height: 9%; }
 #hitbox-porta { top: 30%; left: 63%; width: 10.5%; height: 9%; }
+
+
 /* ==========================================================================
    PANTALLAS MODALES (Tu sistema de cajas mágicas a pantalla completa)
    ========================================================================== */
@@ -364,6 +366,10 @@ body.fase-oscura {
     z-index: 10;
 }
 
+.fase-oscura-activa::after {
+    display: none !important; /* Oculta por completo el filtro de luz de día al pasar a la noche */
+}
+
 #luz-vela {
     position: absolute; 
     top: 50%;
@@ -389,8 +395,8 @@ body.fase-oscura {
     left: 50%;
     
     /* Tamaño fijo de tu icono */
-    width: 200px; 
-    height: 200px;
+    width: 120px; 
+    height: 120px;
     
     /* Centrado absoluto */
     transform: translate(-50%, -50%); 
@@ -402,7 +408,7 @@ body.fase-oscura {
     background-position: center;
     
     filter: drop-shadow(0 0 10px #fffa65);
-    animation: vibracion-llama 0.1s infinite alternate;
+
 }
 
 
@@ -448,3 +454,5 @@ body.fase-oscura {
     .item-objetivo { padding: 5px 12px; font-size: 0.85rem; gap: 8px; }
     .mensaje-caja { padding: 20px; max-width: 90%; }
 }
+
+

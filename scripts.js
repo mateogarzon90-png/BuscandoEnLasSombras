@@ -74,33 +74,38 @@ const JuegoAdviento = {
 
     // Disparador único para cuando se encuentra un objeto válido en cualquier fase
     objetoEncontrado: function(idObjeto) {
-        // Seleccionamos el mapa de progreso correspondiente a la fase activa
-        const progresoActual = (this.faseActual === 1) ? this.progresoFase1 : this.progresoFase2;
+        // 1. Identificamos qué objeto de progreso usar según la fase actual
+        const progresoActual = this.faseActual === 1 ? this.progresoFase1 : this.progresoFase2;
 
-        if (progresoActual[idObjeto]) return;
-        
+        // Si por alguna razón no encuentra el progreso o ya se descubrió, salimos
+        if (!progresoActual || progresoActual[idObjeto]) return;
+
+        // 2. Disparamos la animación visual de las chispas
         this.crearChispas(idObjeto);
 
-        // Registrar el hallazgo
+        // 3. Registramos el progreso en la fase correspondiente y sumamos el contador
         progresoActual[idObjeto] = true;
         this.conteoEncontrados++;
 
-        // Ocultar de inmediato la zona interactiva activa (hitbox)
+        // 4. Ocultamos de inmediato la hitbox interactiva clickeada
         const hitbox = document.getElementById(`hitbox-${idObjeto}`);
         if (hitbox) hitbox.style.display = 'none';
 
-        // Vincular con la tarjeta correspondiente de la interfaz inferior
-        const idDOMElemento = (this.faseActual === 1) ? `obj-${idObjeto}` : `obj-noche-${idObjeto}`;
-        const itemInterfaz = document.getElementById(idDOMElemento);
+        // 5. Añadimos la clase CSS que activa el check verde en el menú inferior
+        const itemInterfaz = document.getElementById(`obj-${idObjeto}`);
         if (itemInterfaz) itemInterfaz.classList.add('encontrado');
 
-        // Actualizar el marcador superior dinámicamente según los totales por fase
-        const totalObjetosFase = (this.faseActual === 1) ? 4 : 5;
-       // Línea corregida:
-        document.getElementById('contador-objetos').innerText = `Objetos: ${this.conteoEncontrados} / ${totalObjetosFase}`;
+        // 6. Calculamos el total de objetos de ESTA fase de forma dinámica
+        const totalObjetosFase = Object.keys(progresoActual).length;
+        
+        const contadorVisual = document.getElementById('contador-objetos');
+        if (contadorVisual) {
+            contadorVisual.innerText = `Objetos: ${this.conteoEncontrados} / ${totalObjetosFase}`;
+        }
+
+        // 7. Comprobamos si se completó la habitación actual
         this.comprobarVictoria();
     },
-
     crearChispas: function(idObjeto) {
         const hitbox = document.getElementById(`hitbox-${idObjeto}`);
         const escenario = document.getElementById('escenario-busqueda');
@@ -139,22 +144,27 @@ const JuegoAdviento = {
     },
 
     comprobarVictoria: function() {
-        if (this.faseActual === 1) {
-            const victoriaFase1 = Object.values(this.progresoFase1).every(item => item === true);
-            if (victoriaFase1) {
-                setTimeout(() => {
-                    const pantallaFinal = document.getElementById('pantalla-final');
-                    if (pantallaFinal) pantallaFinal.classList.remove('oculto');
-                }, 500);
-            }
-        } else {
-            const victoriaFase2 = Object.values(this.progresoFase2).every(item => item === true);
-            if (victoriaFase2) {
-                setTimeout(() => {
-                    // Acción final cuando completan el juego a oscuras
-                    alert("🌟 ¡Felicidades! Has completado la exploración del altillo bajo la luz de la vela.");
-                }, 500);
-            }
+        // Seleccionamos el progreso de la fase que se está jugando
+        const progresoActual = this.faseActual === 1 ? this.progresoFase1 : this.progresoFase2;
+        
+        if (!progresoActual) return;
+
+        // Comprobamos si todos los elementos de esta fase están en true
+        const victoriaFase = Object.values(progresoActual).every(item => item === true);
+
+        if (victoriaFase) {
+            setTimeout(() => {
+                if (this.faseActual === 1) {
+                    // Fin de los Cajones -> Mostramos transición al Altillo
+                    const modalAltillo = document.getElementById('pantalla-transicion-altillo');
+                    if (modalAltillo) modalAltillo.classList.remove('oculto');
+                    
+                } else if (this.faseActual === 2) {
+                    // Fin del Altillo -> Mostramos transición a los Niños
+                    const modalNinos = document.getElementById('pantalla-transicion-ninos');
+                    if (modalNinos) modalNinos.classList.remove('oculto');
+                }
+            }, 600);
         }
     },
 
@@ -162,6 +172,7 @@ const JuegoAdviento = {
     iniciarFaseOscura: function() {
         if (this.faseOscuraActiva) return;
         this.faseOscuraActiva = true;
+        
         this.faseActual = 2;       // Cambiamos el puntero a la fase 2
         this.conteoEncontrados = 0; // Reiniciamos el contador parcial
 
@@ -255,6 +266,81 @@ const JuegoAdviento = {
         });
 
         console.log("🕯️ La vela ha sido encendida. Modo noche activado perfectamente.");
+    },
+
+    // Nueva función dentro de JuegoAdviento
+    iniciarHabitacionNinos: function() {
+        console.log("🚂 Entrando a la habitación de los niños...");
+
+        document.getElementById('pantalla-transicion-ninos').classList.add('oculto');
+        
+        // ACTUALIZAMOS EL MOTOR DEL JUEGO
+        this.faseActual = 3; // ¡Clave para que comprobarVictoria sepa dónde estamos!
+        this.conteoEncontrados = 0;
+
+        // 1. Cambiamos la imagen de fondo
+        const escenario = document.getElementById('escenario-busqueda');
+        const imagenEscenario = escenario.querySelector('.imagen-escenario');
+        if (imagenEscenario) {
+            imagenEscenario.src = './habitacion2.png'; 
+        }
+
+        // 2. Limpiamos las hitboxes del altillo para que no estorben
+        const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
+        hitboxesAntiguas.forEach(hb => hb.remove());
+
+        // 3. Reseteamos el progreso para esta nueva fase
+        this.conteoEncontrados = 0;
+        this.progreso = {
+            cuentos: false,
+            maleta: false,
+            osito: false,
+            trencito: false,
+            adornoangel: false
+        };
+
+        // 4. Actualizamos el marcador superior
+        document.getElementById('contador-objetos').innerText = `Objetos: 0 / 5`;
+
+        // 5. Inyectamos los nuevos objetos en el panel de inventario HTML
+        const panelInventario = document.querySelector('.inventario-objetivos');
+        panelInventario.innerHTML = `
+            <div class="item-objetivo" id="obj-cuentos">
+                <div class="contenedor-icono"><img src="./objetos/Cuentos.png" class="icono-objeto" alt="Cuentos"></div>
+                <span class="nombre-objeto">Cuentos</span>
+            </div>
+            <div class="item-objetivo" id="obj-maleta">
+                <div class="contenedor-icono"><img src="./objetos/Maleta.png" class="icono-objeto" alt="Maleta"></div>
+                <span class="nombre-objeto">Maleta</span>
+            </div>
+            <div class="item-objetivo" id="obj-osito">
+                <div class="contenedor-icono"><img src="./objetos/Osito.png" class="icono-objeto" alt="Osito"></div>
+                <span class="nombre-objeto">Osito</span>
+            </div>
+            <div class="item-objetivo" id="obj-trencito">
+                <div class="contenedor-icono"><img src="./objetos/Trencito.png" class="icono-objeto" alt="Trencito"></div>
+                <span class="nombre-objeto">Trencito</span>
+            </div>
+            <div class="item-objetivo" id="obj-adornoangel">
+                <div class="contenedor-icono"><img src="./objetos/AdornoAngel.png" class="icono-objeto" alt="Ángel"></div>
+                <span class="nombre-objeto">Ángel</span>
+            </div>
+        `;
+
+        // 6. Creamos las nuevas hitboxes dinámicamente y les asignamos el evento
+        const idsObjetos = ['cuentos', 'maleta', 'osito', 'trencito', 'adornoangel'];
+        idsObjetos.forEach(id => {
+            const hitbox = document.createElement('div');
+            hitbox.id = `hitbox-${id}`;
+            hitbox.className = 'hitbox';
+            
+            // Le damos un color rojo temporal con CSS inline para que las veas y las calibres
+            hitbox.style.background = 'rgba(255, 0, 0, 0.35)';
+            
+            // Reutilizamos tu función objetoEncontrado
+            hitbox.addEventListener('click', () => this.objetoEncontrado(id));
+            escenario.appendChild(hitbox);
+        });
     }
 };
 

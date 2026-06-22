@@ -3,7 +3,7 @@
 // ==========================================================================
 const JuegoAdviento = {
     silenciado: false,
-    faseActual: 1,           // 1 = Cajones (Día), 2 = Altillo (Noche)
+    faseActual: 1,           
     faseOscuraActiva: false,
     conteoEncontrados: 0,
     
@@ -23,10 +23,25 @@ const JuegoAdviento = {
         foto: false,
         star: false
     },
+    
+    // Progreso de la Fase 3 (Niños - 5 Objetos) 
+    progresoFase3: {
+        cuentos: false,
+        maleta: false,
+        osito: false,
+        trencito: false,
+        adornoangel: false
+    },
 
-    // Diccionario de configuración para los nuevos objetos de la Fase 2
-    // NOTA: Los valores de 'top' y 'left' son provisionales. Puedes calibrar 
-    // sus posiciones exactas modificando estos porcentajes.
+    // Progreso de la Fase 4 (Salón - 6 Objetos)
+    progresoFase4: {
+        boligrafo: false,
+        cintapegante: false,
+        etiquetas: false,
+        lazo: false,
+        tijeras: false
+    },
+
     objetosFase2: {
         angel: { nombre: 'Ángel de madera', imagen: 'objetos/Angel2.png', top: '42%', left: '3%', width: '5%', height: '10%' },
         bell: {  nombre: 'Campana antigua',  imagen: 'objetos/Bell2.png',  top: '30%', left: '85%', width: '5%', height: '9%' },
@@ -35,7 +50,25 @@ const JuegoAdviento = {
         star: {  nombre: 'Estrella dorada',  imagen: 'objetos/Star2.png',  top: '87%', left: '77%', width: '5%', height: '6%' }
     },
 
+    // 🎵 GESTOR DE AUDIOS
+    sonidos: {
+        acierto: new Audio('./sonidos/shineReward.mp3'),
+        transicion: new Audio('./sonidos/door.mp3'),
+        victoria: new Audio('./sonidos/ending.mp3'),
+        fondo: new Audio('./sonidos/magic-night.mp3'),
+        inicio: new Audio('./sonidos/openDrawer.mp3'),
+        encender: new Audio('./sonidos/match-lighting.mp3'),
+        candela: new Audio('./sonidos/candle.mp3')
+    },
+
     init: function() {
+        this.sonidos.fondo.loop = true;
+        this.sonidos.candela.loop = true;
+        
+        // Ajustamos un poco el volumen del fondo para que no tape los efectos
+        this.sonidos.fondo.volume = 0.4;
+        this.sonidos.candela.volume = 0.6;
+
         this.conectarEventos();
     },
 
@@ -46,10 +79,15 @@ const JuegoAdviento = {
         }
     },
 
-    // Oculta el modal de inicio y libera la escena
+    // Oculta el modal de inicio e inicia los audios base
     comenzarJuego: function() {
         const pantallaInicio = document.getElementById('pantalla-inicio');
         if (pantallaInicio) pantallaInicio.classList.add('oculto');
+        
+        // 🎵 Iniciar el cajón y la música de fondo
+        this.reproducirSonido('inicio');
+        this.reproducirSonido('fondo');
+        
         console.log("Fase 1: Búsqueda iniciada.");
     },
 
@@ -70,32 +108,48 @@ const JuegoAdviento = {
             if (iconoOn) iconoOn.classList.remove('oculto');
             if (iconoOff) iconoOff.classList.add('oculto');
         }
+
+        // 🌟 EL TRUCO: Silencia/Desilencia todos los audios a la vez
+        for (const key in this.sonidos) {
+            this.sonidos[key].muted = this.silenciado;
+        }
     },
 
-    // Disparador único para cuando se encuentra un objeto válido en cualquier fase
-    objetoEncontrado: function(idObjeto) {
-        // 1. Identificamos qué objeto de progreso usar según la fase actual
-        const progresoActual = this.faseActual === 1 ? this.progresoFase1 : this.progresoFase2;
+    reproducirSonido: function(tipoSonido) {
+        if (this.silenciado) return; 
 
-        // Si por alguna razón no encuentra el progreso o ya se descubrió, salimos
+        if (this.sonidos[tipoSonido]) {
+            // Solo reiniciamos al segundo 0 si NO es música de fondo
+            if (tipoSonido !== 'fondo' && tipoSonido !== 'candela') {
+                this.sonidos[tipoSonido].currentTime = 0; 
+            }
+            this.sonidos[tipoSonido].play().catch(e => console.log("Esperando interacción del usuario."));
+        }
+    },
+
+    objetoEncontrado: function(idObjeto) {
+        let progresoActual;
+        if (this.faseActual === 1) progresoActual = this.progresoFase1;
+        else if (this.faseActual === 2) progresoActual = this.progresoFase2;
+        else if (this.faseActual === 3) progresoActual = this.progresoFase3;
+        else if (this.faseActual === 4) progresoActual = this.progresoFase4;
+
         if (!progresoActual || progresoActual[idObjeto]) return;
 
-        // 2. Disparamos la animación visual de las chispas
         this.crearChispas(idObjeto);
+        
+        // 🎵 Disparamos el sonido de acierto
+        this.reproducirSonido('acierto');
 
-        // 3. Registramos el progreso en la fase correspondiente y sumamos el contador
         progresoActual[idObjeto] = true;
         this.conteoEncontrados++;
 
-        // 4. Ocultamos de inmediato la hitbox interactiva clickeada
         const hitbox = document.getElementById(`hitbox-${idObjeto}`);
         if (hitbox) hitbox.style.display = 'none';
 
-        // 5. Añadimos la clase CSS que activa el check verde en el menú inferior
         const itemInterfaz = document.getElementById(`obj-${idObjeto}`);
         if (itemInterfaz) itemInterfaz.classList.add('encontrado');
 
-        // 6. Calculamos el total de objetos de ESTA fase de forma dinámica
         const totalObjetosFase = Object.keys(progresoActual).length;
         
         const contadorVisual = document.getElementById('contador-objetos');
@@ -103,9 +157,9 @@ const JuegoAdviento = {
             contadorVisual.innerText = `Objetos: ${this.conteoEncontrados} / ${totalObjetosFase}`;
         }
 
-        // 7. Comprobamos si se completó la habitación actual
         this.comprobarVictoria();
     },
+
     crearChispas: function(idObjeto) {
         const hitbox = document.getElementById(`hitbox-${idObjeto}`);
         const escenario = document.getElementById('escenario-busqueda');
@@ -144,78 +198,86 @@ const JuegoAdviento = {
     },
 
     comprobarVictoria: function() {
-        // Seleccionamos el progreso de la fase que se está jugando
-        const progresoActual = this.faseActual === 1 ? this.progresoFase1 : this.progresoFase2;
-        
+        let progresoActual;
+        if (this.faseActual === 1) progresoActual = this.progresoFase1;
+        else if (this.faseActual === 2) progresoActual = this.progresoFase2;
+        else if (this.faseActual === 3) progresoActual = this.progresoFase3;
+        else if (this.faseActual === 4) progresoActual = this.progresoFase4;
+
         if (!progresoActual) return;
 
-        // Comprobamos si todos los elementos de esta fase están en true
         const victoriaFase = Object.values(progresoActual).every(item => item === true);
 
         if (victoriaFase) {
             setTimeout(() => {
                 if (this.faseActual === 1) {
-                    // Fin de los Cajones -> Mostramos transición al Altillo
                     const modalAltillo = document.getElementById('pantalla-transicion-altillo');
                     if (modalAltillo) modalAltillo.classList.remove('oculto');
                     
+                    // 🎵 Encendemos la cerilla y el bucle de la candela
+                    this.reproducirSonido('encender');
+                    this.reproducirSonido('candela');
+                    
                 } else if (this.faseActual === 2) {
-                    // Fin del Altillo -> Mostramos transición a los Niños
                     const modalNinos = document.getElementById('pantalla-transicion-ninos');
                     if (modalNinos) modalNinos.classList.remove('oculto');
+                    
+                } else if (this.faseActual === 3) {
+                    const modalSalon = document.getElementById('pantalla-transicion-salon');
+                    if (modalSalon) modalSalon.classList.remove('oculto');
+
+                } else if (this.faseActual === 4) {
+                    const pantallaFinal = document.getElementById('pantalla-final');
+                    if (pantallaFinal) pantallaFinal.classList.remove('oculto');
+                    
+                    // 🎵 Música final y apagamos los ambientes
+                    this.sonidos.fondo.pause();
+                    this.sonidos.candela.pause();
+                    this.reproducirSonido('victoria');
                 }
             }, 600);
         }
     },
 
-    // Transición controlada hacia la Fase Nocturna (Altillo)
     iniciarFaseOscura: function() {
         if (this.faseOscuraActiva) return;
         this.faseOscuraActiva = true;
         
-        this.faseActual = 2;       // Cambiamos el puntero a la fase 2
-        this.conteoEncontrados = 0; // Reiniciamos el contador parcial
+        this.faseActual = 2;       
+        this.conteoEncontrados = 0; 
 
-        // 1. Esconder modal de victoria intermedio
+        const modalAltillo = document.getElementById('pantalla-transicion-altillo');
+        if (modalAltillo) modalAltillo.classList.add('oculto');
+
         const pantallaFinal = document.getElementById('pantalla-final');
         if (pantallaFinal) pantallaFinal.classList.add('oculto');
         
-        // 2. Localizar y validar escenario base
         const escenario = document.getElementById('escenario-busqueda');
-        if (!escenario) {
-            console.error("No se encontró el elemento #escenario-busqueda");
-            return;
-        }
+        if (!escenario) return;
 
-        // 3. Reemplazar fondo gráfico por el nuevo archivo del altillo
         const imagenEscenario = escenario.querySelector('.imagen-escenario');
         if (imagenEscenario) {
             imagenEscenario.src = './altillo.png'; 
         }
 
-        // 4. Limpieza absoluta del DOM: removemos físicamente las hitboxes de los cajones
         const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
         hitboxesAntiguas.forEach(hb => hb.remove());
         
-        // 5. Vaciar y reconstruir el contenedor visual del inventario de objetivos
         const panelInventario = document.querySelector('.inventario-objetivos');
         if (panelInventario) {
-            panelInventario.innerHTML = ''; // Limpiamos las tarjetas de las cerillas y velas antiguas
+            panelInventario.innerHTML = ''; 
         }
 
-        // 6. Actualizar textos de la interfaz de usuario de forma inmediata
         document.getElementById('contador-objetos').innerText = `Objetos: 0 / 5`;
         const tituloHeader = document.querySelector('.interfaz-superior h1');
-        if (tituloHeader) tituloHeader.innerText = "🕯️ 2º Domingo: El Altillo a Oscuras";
+        if (tituloHeader) tituloHeader.innerText = "🕯️ El Altillo a Oscuras";
 
-        // 7. Renderizar dinámicamente los nuevos elementos recortados y sus hitboxes correspondientes
         for (const key in this.objetosFase2) {
             const obj = this.objetosFase2[key];
 
-            // A. Inyección de la nueva tarjeta de inventario en el HTML
             if (panelInventario) {
                 const estructuraTarjeta = `
-                    <div class="item-objetivo" id="obj-noche-${key}">
+                    <div class="item-objetivo" id="obj-${key}">
                         <div class="contenedor-icono">
                             <img src="${obj.imagen}" alt="${obj.nombre}" class="icono-objeto">
                             <span class="check-completado"></span>
@@ -226,25 +288,21 @@ const JuegoAdviento = {
                 panelInventario.innerHTML += estructuraTarjeta;
             }
 
-            // B. Creación dinámica de la nueva zona interactiva (hitbox) en el escenario
             const nuevaHitbox = document.createElement('button');
             nuevaHitbox.className = 'hitbox';
             nuevaHitbox.id = `hitbox-${key}`;
             nuevaHitbox.title = obj.nombre;
             
-            // Posicionamiento porcentual escalable heredado del diccionario de configuración
             nuevaHitbox.style.top = obj.top;
             nuevaHitbox.style.left = obj.left;
             nuevaHitbox.style.width = obj.width;
             nuevaHitbox.style.height = obj.height;
             
-            // Vinculación segura del evento click del botón hacia nuestro manejador global
             nuevaHitbox.setAttribute('onclick', `JuegoAdviento.objetoEncontrado('${key}')`);
             
             escenario.appendChild(nuevaHitbox);
         }
         
-        // 8. Inicialización y acople del efecto vela (Filtro e iluminación localizada)
         escenario.classList.add('fase-oscura-activa');
         
         const luz = document.createElement('div');
@@ -253,7 +311,6 @@ const JuegoAdviento = {
         
         const self = this;
         
-        // Captura interactiva del movimiento dentro del contenedor adaptada a coordenadas locales
         escenario.addEventListener('mousemove', function(e) {
             if (!self.faseOscuraActiva) return;
 
@@ -268,30 +325,28 @@ const JuegoAdviento = {
         console.log("🕯️ La vela ha sido encendida. Modo noche activado perfectamente.");
     },
 
-    // Nueva función dentro de JuegoAdviento
     iniciarHabitacionNinos: function() {
         console.log("🚂 Entrando a la habitación de los niños...");
+        
+        // 🎵 Suena la puerta al cambiar de habitación
+        this.reproducirSonido('transicion');
 
         document.getElementById('pantalla-transicion-ninos').classList.add('oculto');
         
-        // ACTUALIZAMOS EL MOTOR DEL JUEGO
-        this.faseActual = 3; // ¡Clave para que comprobarVictoria sepa dónde estamos!
+        this.faseActual = 3; 
         this.conteoEncontrados = 0;
 
-        // 1. Cambiamos la imagen de fondo
         const escenario = document.getElementById('escenario-busqueda');
         const imagenEscenario = escenario.querySelector('.imagen-escenario');
         if (imagenEscenario) {
             imagenEscenario.src = './habitacion2.png'; 
         }
 
-        // 2. Limpiamos las hitboxes del altillo para que no estorben
         const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
         hitboxesAntiguas.forEach(hb => hb.remove());
 
-        // 3. Reseteamos el progreso para esta nueva fase
         this.conteoEncontrados = 0;
-        this.progreso = {
+        this.progresoFase3 = {
             cuentos: false,
             maleta: false,
             osito: false,
@@ -299,10 +354,12 @@ const JuegoAdviento = {
             adornoangel: false
         };
 
-        // 4. Actualizamos el marcador superior
         document.getElementById('contador-objetos').innerText = `Objetos: 0 / 5`;
+        
+        // Actualizamos el título de la sala
+        const tituloHeader = document.querySelector('.interfaz-superior h1');
+        if (tituloHeader) tituloHeader.innerText = "🚂 Habitación de los Niños";
 
-        // 5. Inyectamos los nuevos objetos en el panel de inventario HTML
         const panelInventario = document.querySelector('.inventario-objetivos');
         panelInventario.innerHTML = `
             <div class="item-objetivo" id="obj-cuentos">
@@ -327,17 +384,82 @@ const JuegoAdviento = {
             </div>
         `;
 
-        // 6. Creamos las nuevas hitboxes dinámicamente y les asignamos el evento
         const idsObjetos = ['cuentos', 'maleta', 'osito', 'trencito', 'adornoangel'];
         idsObjetos.forEach(id => {
             const hitbox = document.createElement('div');
             hitbox.id = `hitbox-${id}`;
             hitbox.className = 'hitbox';
             
-            // Le damos un color rojo temporal con CSS inline para que las veas y las calibres
-            hitbox.style.background = 'rgba(255, 0, 0, 0.35)';
-            
-            // Reutilizamos tu función objetoEncontrado
+            hitbox.addEventListener('click', () => this.objetoEncontrado(id));
+            escenario.appendChild(hitbox);
+        });
+    },
+
+    iniciarHabitacionSalon: function() {
+        console.log("🎁 Entrando al salón principal...");
+        
+        // 🎵 Suena la puerta al cambiar de habitación
+        this.reproducirSonido('transicion');
+
+        const modalSalon = document.getElementById('pantalla-transicion-salon');
+        if (modalSalon) modalSalon.classList.add('oculto');
+        
+        this.faseActual = 4;
+        this.conteoEncontrados = 0;
+
+        const escenario = document.getElementById('escenario-busqueda');
+        const imagenEscenario = escenario.querySelector('.imagen-escenario');
+        if (imagenEscenario) {
+            imagenEscenario.src = './salon3.png'; 
+        }
+
+        const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
+        hitboxesAntiguas.forEach(hb => hb.remove());
+
+        this.progresoFase4 = {
+            boligrafo: false,
+            cintapegante: false,
+            etiquetas: false,
+            lazo: false,
+            tijeras: false
+        };
+
+        document.getElementById('contador-objetos').innerText = `Objetos: 0 / 5`;
+        
+        // Actualizamos el título de la sala
+        const tituloHeader = document.querySelector('.interfaz-superior h1');
+        if (tituloHeader) tituloHeader.innerText = "🎁 El Salón Principal";
+
+        const panelInventario = document.querySelector('.inventario-objetivos');
+        panelInventario.innerHTML = `
+            <div class="item-objetivo" id="obj-boligrafo">
+                <div class="contenedor-icono"><img src="./objetos/Boligrafo.png" class="icono-objeto" alt="Bolígrafo"></div>
+                <span class="nombre-objeto">Bolígrafo</span>
+            </div>
+            <div class="item-objetivo" id="obj-cintapegante">
+                <div class="contenedor-icono"><img src="./objetos/CintaPegante.png" class="icono-objeto" alt="Cinta Pegante"></div>
+                <span class="nombre-objeto">Cinta Pegante</span>
+            </div>
+            <div class="item-objetivo" id="obj-etiquetas">
+                <div class="contenedor-icono"><img src="./objetos/Etiquetas.png" class="icono-objeto" alt="Etiquetas"></div>
+                <span class="nombre-objeto">Etiquetas</span>
+            </div>
+            <div class="item-objetivo" id="obj-lazo">
+                <div class="contenedor-icono"><img src="./objetos/Lazo.png" class="icono-objeto" alt="Lazo"></div>
+                <span class="nombre-objeto">Lazo</span>
+            </div>
+            <div class="item-objetivo" id="obj-tijeras">
+                <div class="contenedor-icono"><img src="./objetos/Tijeras.png" class="icono-objeto" alt="Tijeras"></div>
+                <span class="nombre-objeto">Tijeras</span>
+            </div>
+        `;
+
+        // Añadido el rompenueces al array de IDs
+        const idsObjetos = ['boligrafo', 'cintapegante', 'etiquetas', 'lazo','tijeras'];
+        idsObjetos.forEach(id => {
+            const hitbox = document.createElement('div');
+            hitbox.id = `hitbox-${id}`;
+            hitbox.className = 'hitbox';  
             hitbox.addEventListener('click', () => this.objetoEncontrado(id));
             escenario.appendChild(hitbox);
         });

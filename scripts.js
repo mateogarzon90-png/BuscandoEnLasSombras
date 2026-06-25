@@ -258,6 +258,7 @@ const JuegoAdviento = {
         const imagenEscenario = escenario.querySelector('.imagen-escenario');
         if (imagenEscenario) {
             imagenEscenario.src = './altillo.png'; 
+            imagenEscenario.style.filter = 'brightness(80%)';
         }
 
         const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
@@ -340,6 +341,7 @@ const JuegoAdviento = {
         const imagenEscenario = escenario.querySelector('.imagen-escenario');
         if (imagenEscenario) {
             imagenEscenario.src = './habitacion2.png'; 
+            imagenEscenario.style.filter = 'brightness(50%)';
         }
 
         const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');
@@ -411,6 +413,7 @@ const JuegoAdviento = {
         const imagenEscenario = escenario.querySelector('.imagen-escenario');
         if (imagenEscenario) {
             imagenEscenario.src = './salon3.png'; 
+            imagenEscenario.style.filter = 'brightness(35%)';
         }
 
         const hitboxesAntiguas = escenario.querySelectorAll('.hitbox');

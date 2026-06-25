@@ -228,6 +228,7 @@ body {
     display: block;
     height: auto;
     user-select: none;
+    transition: filter 1.5s ease-in-out;
 }
 
 /* 🌟 LA CAPA MÁGICA: Aplica el degradado interactuando con la acuarela */
@@ -409,7 +410,7 @@ body.fase-oscura {
     
     /* Degradado y sombra azulada */
     background: radial-gradient(circle, rgba(255, 250, 101, 0.25) 0%, rgba(255, 159, 67, 0.1) 45%, transparent 80%);
-    box-shadow: 0 0 120px 5000px rgba(20, 45, 85, 0.85);
+    box-shadow: 0 0 120px 5000px rgba(0, 13, 34, 0.95);
 }
 
 /* El icono de la vela */
